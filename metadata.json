@@ -1,0 +1,8 @@
+{
+  "name": "Township CEO",
+  "description": "An AI Operating System for township businesses that helps entrepreneurs make better business decisions using multiple AI agents working together.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
