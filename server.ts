@@ -55,24 +55,167 @@ const fallbackProvider: AIProvider = {
   generateText: async (prompt: string, options?: GenerationOptions): Promise<string> => {
     // Generate intelligent, localized answers based on context clues
     const systemInstruction = options?.systemInstruction || "";
-    const isMarketing = systemInstruction.includes("Marketing") || prompt.includes("marketing") || prompt.includes("WhatsApp");
-    const isFinance = systemInstruction.includes("Finance") || prompt.includes("finance") || prompt.includes("break-even");
-    const isCustomerService = systemInstruction.includes("Customer Service") || prompt.includes("complaint");
-    const isCEO = systemInstruction.includes("CEO") || prompt.includes("strategic");
+    
+    const isMarketing = systemInstruction.includes("Marketing") || prompt.includes("Create a promotional campaign");
+    const isCustomerService = systemInstruction.includes("Customer Service") || prompt.includes("Generate a warm customer care response");
+    const isResearch = systemInstruction.includes("Research") || prompt.includes("Analyze competitor trends");
+    const isFinance = systemInstruction.includes("Finance") || prompt.includes("Perform a gross profit margin");
+    const isOperations = systemInstruction.includes("Operations") || prompt.includes("Design operational and load-shedding safeguards");
+    const isCEO = systemInstruction.includes("CEO") || prompt.includes("Summarize the specialist reports");
 
-    if (isMarketing) {
-      return `📢 *WhatsApp mid-month promo deal draft!* 📢\n\nHey family! Is the wallet feeling a bit light? 🇿🇦 We got you covered at Sizwe's Barber Shop! 💈\n\n🔥 *MID-MONTH REFRESH COMBO* 🔥\nGet a clean cut, a sharp beard shave AND a hot towel treatment for only *R120* (Save R40!) \n\n📍 Visit us at Stand 432, Orlando West, Soweto\n⏰ Valid Mon - Thu only! \n\nReply to this message to book your spot! 📲`;
+    // Helper to extract fields using regex
+    const extract = (regex: RegExp, defaultVal: string): string => {
+      const match = prompt.match(regex);
+      return match ? match[1].trim() : defaultVal;
+    };
+
+    // Extract fields dynamically from prompt
+    const businessType = extract(/for a ([^at\n]+) at/i, "Township Micro-Enterprise");
+    const location = extract(/at ([^facing\n,]+)/i, "Local Township");
+    const challenges = extract(/(?:facing|details):\s*"([^"]+)"/i, "Operational cost pressures and regional supply constraints");
+    
+    // Request can come from multiple formats
+    let request = extract(/(?:address|question|based on):\s*"([^"]+)"/i, "");
+    if (!request) {
+      request = extract(/Goal:\s*([^\n.]+)/i, "");
+      if (!request) {
+        request = extract(/issue:\s*"([^"]+)"/i, "How to optimize business operations and profitability?");
+      }
     }
 
-    if (isFinance) {
-      return `📊 *Finance Specialist - Break-Even Analysis* 📊\n\nBased on your profile, your daily fixed operational expense is R106 (R3200 expenses over 30 days). \n\n1. *Profit Margin*: 41.8%\n2. *Daily Break-Even Revenue*: R254. You need to make at least R254 in sales daily just to pay the bills.\n3. *Analysis*: Sourcing wholesale snacks directly in bulk from Devland Cash & Carry will reduce stock procurement cost by 15%, shifting your margin from 41.8% up to 48.2%. This lowers your break-even point to R220/day, creating R1,200 of extra monthly cash buffer. Ensure you don't blend this cash with household grocery spending!`;
+    const revenueValStr = extract(/Revenue\s*=\s*R?([0-9,.]+)/i, "12000");
+    const expensesValStr = extract(/Expenses\s*=\s*R?([0-9,.]+)/i, "7500");
+    const revenue = parseFloat(revenueValStr.replace(/,/g, "")) || 12000;
+    const expenses = parseFloat(expensesValStr.replace(/,/g, "")) || 7500;
+
+    const businessName = extract(/(?:plan for|Campaign for|Business:)\s*([^\n(.]+)/i, "Our Enterprise");
+
+    if (isMarketing) {
+      return `📢 *WhatsApp Status & Flyer Promotion Deal* 📢
+
+Hey community! The team at **${businessName}** has an exclusive offer just for you! 🇿🇦
+
+🔥 *${request.toUpperCase()}* 🔥
+
+We are proud to serve you with top-tier **${businessType}** solutions in **${location}**. We know times are tough, so we're giving you maximum value:
+
+✨ *THE EXCLUSIVE DEAL* ✨
+Get our premium service and professional care at a special discounted price!
+
+📍 **Find us**: Stand 42, ${location}
+⏰ **Offer valid**: Mon - Thu only!
+
+Reply directly to this WhatsApp message to secure your spot or place your order now! 📲`;
     }
 
     if (isCustomerService) {
-      return `🤝 *Customer Service Specialist Response Template* 🤝\n\n"Hi Thabo, thank you for reaching out to us. We sincerely apologize for the delay in completing your vehicle service yesterday. We had a sudden load-shedding outage which affected our hydraulic lift systems. We values your support and would love to offer you a free engine oil top-up on your next visit! Please present this message at Stand 104, Alexandra."\n\n*Loyalty System Suggestion*: Introduce a "5th Service Free" WhatsApp punch card. Provide stamp confirmation tags digitally to keep taxi operators returning.`;
+      return `🤝 *Customer Care Response Template* 🤝
+
+"Hi, thank you so much for bringing this to our attention. We sincerely apologize for the experience regarding: *${request}*.
+
+As a proud local business in ${location}, we highly value your support and want to resolve this immediately. We are putting extra operational safeguards in place to ensure this doesn't happen again.
+
+To show our appreciation, we would love to offer you a **15% discount** or a **complimentary upgrade** on your next visit to **${businessName}**. Please show this message to our team!"
+
+---
+
+*Operational Customer Retention Guide*:
+- Check in with the customer via WhatsApp 48 hours later to ensure they are fully happy.
+- Log customer feedback in your diary to identify and solve frequent friction points.`;
     }
 
-    return `🤝 *CEO Orchestrator Strategic Masterplan* 🤝\n\nI have reviewed your concern regarding procurement costs and aligned with our specialized agents:\n\n1. 📊 *Financial Impact (Finance Agent)*: Sourcing represents 58% of overall costs. Reducing this by 12% expands your runway by 18 days.\n2. 🔍 *Sourcing Intel (Research Agent)*: Joining the Soweto Traders Buying Association unlocks 12-15% bulk discounts at central wholesalers.\n3. 📦 *Contingency (Operations Agent)*: Set a reorder point of 3 units on high-demand items to prevent empty shelves during bulk deliveries.\n\n*Action Steps*:\n- Contact the Soweto cooperative representative at the community hall this Thursday.\n- Reinvest the R1,200 savings into high-margin items like paraffin or fresh bread.`;
+    if (isResearch) {
+      return `🔍 *Research Specialist - Regional Wholesaler & Competitor Intel* 🔍
+
+We analyzed competitive benchmarks and supplier options for a **${businessType}** business operating in **${location}**.
+
+1. 📊 *Competitor Landscape in ${location}*:
+   Most operators facing similar challenges ("${challenges}") see customer loyalty fluctuate based on immediate availability and price consistency. Securing a low-cost, reliable supply chain is key.
+
+2. 🚛 *Wholesale & Sourcing Intel*:
+   - **Option A (Bulk Sourcing Hub)**: We recommend auditing wholesalers within a 15km radius of ${location} for cash-and-carry volume tiers.
+   - **Option B (Trader Cooperatives)**: Joining local township buyer syndicates can unlock 12% to 15% wholesale discounts.
+
+3. 🎯 *Direct Action Plan for: "${request}"*:
+   Benchmark your top 3 high-volume items. Standardize supplier checks every Monday morning to catch price cuts early.`;
+    }
+
+    if (isFinance) {
+      const netSurplus = revenue - expenses;
+      const margin = revenue > 0 ? (netSurplus / revenue) * 100 : 0;
+      const dailyExpenses = expenses / 30;
+      const dailyBreakEven = margin > 0 ? dailyExpenses / (margin / 100) : dailyExpenses;
+      const runwayDays = expenses > 0 ? (revenue / expenses) * 30 : 30;
+
+      return `📊 *Finance Specialist - Profit Margins & Capital Allocations* 📊
+
+We completed a financial baseline audit for **${businessName}** based on your inputs:
+- **Monthly Revenue Baseline**: R${revenue.toLocaleString('en-ZA')}
+- **Monthly Expenses Baseline**: R${expenses.toLocaleString('en-ZA')}
+- **Net Monthly Surplus**: R${netSurplus.toLocaleString('en-ZA')} (Margin: **${margin.toFixed(1)}%**)
+
+1. 📈 *Break-Even Analysis*:
+   - **Daily Fixed Overhead Cost**: R${dailyExpenses.toFixed(2)} (Overhead to keep doors open).
+   - **Daily Break-Even Revenue Target**: You must generate at least **R${dailyBreakEven.toFixed(2)}** daily to sustain current operations.
+
+2. 💳 *Runway & Working Capital*:
+   - Your current estimated operational runway is **${runwayDays.toFixed(0)} days** based on cash flow cycles.
+   - To address **"${request}"**, we recommend cutting unnecessary overhead by 12% to extend your monthly cash reserve by R${(expenses * 0.12).toFixed(0)}.
+
+3. 🔒 *Financial Discipline rule*:
+   Keep a separate container/tin for business cash. Never mix business revenue with immediate household purchases.`;
+    }
+
+    if (isOperations) {
+      return `📦 *Operations Specialist - Inventory & Continuity Safeguards* 📦
+
+To address your query: **"${request}"**, we have prepared operational safeguards tailored to your business challenges ("${challenges}"):
+
+1. ⚡ *Load-Shedding & Infrastructure Safeguards*:
+   - Establish a shift/hours calendar that matches regional municipal load-shedding slots.
+   - Equip your work station with dual-rechargeable LED lighting and a basic offline backup solution to keep operations running during outages.
+
+2. 🛒 *Inventory Control*:
+   - Apply a "3-Unit Safety Stock Limit" on your highest-velocity items to prevent stock-outs.
+   - Set up standard reorder thresholds with wholesalers to guarantee reliable delivery.
+
+3. 🛡️ *Risk Mitigation*:
+   - Standardize a digital record of daily transactions on your mobile device to prevent paper loss during peak periods.`;
+    }
+
+    // Default / CEO
+    const netSurplus = revenue - expenses;
+    const margin = revenue > 0 ? (netSurplus / revenue) * 100 : 0;
+    const dailyExpenses = expenses / 30;
+    const dailyBreakEven = margin > 0 ? dailyExpenses / (margin / 100) : dailyExpenses;
+
+    return `🤝 *CEO Orchestrator - Consolidated Strategic Masterplan* 🤝
+
+I have consolidated the specialist recommendations for **${businessName}** in **${location}** to answer your query:
+
+> **"${request}"**
+
+---
+
+### 1. 🔍 Sourcing & Positioning (Research Agent)
+- Audit bulk-buying distributors in **${location}** to negotiate volume pricing.
+- Minimize stock-out risks by forming loose cooperative purchasing alliances with neighboring traders.
+
+### 2. 📊 Cash Flow & Margins (Finance Agent)
+- Maintain your solid gross profit margin (**${margin.toFixed(1)}%**).
+- Focus daily efforts on exceeding your **R${dailyBreakEven.toFixed(2)}** break-even revenue target.
+- Reinvest at least 25% of your monthly surplus (R${(netSurplus * 0.25).toFixed(0)}) back into high-margin stock.
+
+### 3. 📦 Operations & Continuity (Operations Agent)
+- Minimize disruptions from local service or power outages through off-grid adjustments and scheduling.
+- Standardize safety stock controls to ensure you never run out of core materials.
+
+---
+
+### 🚀 Immediate 3-Step Action Plan:
+1. **Days 1-3**: Reach out to 2 local suppliers to quote volume tier pricing for your top 3 supplies.
+2. **Days 4-7**: Establish a separate daily business savings pocket using digital money transfers.
+3. **Weekly**: Review your target daily sales of **R${dailyBreakEven.toFixed(2)}** every Sunday afternoon to plan the upcoming week.`;
   }
 };
 
