@@ -44,7 +44,9 @@ This project was built as a capstone for the **Google 5-Day AI Agents Intensive 
 - **User Feedback Loop**: corrections tracked as labeled failure data per the Day 4 whitepaper
 
 ### Day 2 — Agent Tools & Interoperability (MCP)
-- **MCP-style Tool Engine**: 3 registered tools with JSON schemas (`cash_calculator`, `campaign_generator`, `inventory_optimizer`)
+- **MCP-style Tool Engine**: 4 registered tools with JSON schemas (`cash_calculator`, `campaign_generator`, `inventory_optimizer`, `web_search`)
+- **MCP Server Integration**: `web-search-mcp` spawned as subprocess — three search tools (`full-web-search`, `get-web-search-summaries`, `get-single-web-page-content`) via JSON-RPC over stdio
+- **Real Web Search**: Research Agent auto-triggers web search for queries about regulations, pricing, trends, licensing — returns real content via Bing/Brave/DuckDuckGo
 - **Tool Validation**: parameter schema checking before execution
 - **Tool Discovery**: `GET /api/tools` endpoint for MCP discovery
 - **Tool Results**: structured results fed back into agent context
@@ -94,13 +96,20 @@ npm install
 cp .env.example .env
 # Edit .env with your real Gemini API key
 
-# 3. Run (server + client on port 3000)
+# 3. Setup web-search-mcp (optional — enables real web search in Research Agent)
+cd mcp-servers/web-search-mcp
+npm install
+npx playwright install chromium
+npm run build
+cd ../..
+
+# 4. Run (server + client on port 3000)
 npm run dev
 
-# 4. Open http://localhost:3000
+# 5. Open http://localhost:3000
 ```
 
-**Note**: Without a valid API key, the app runs in DEMO mode with offline mock responses. Set `GEMINI_API_KEY` in `.env` for full AI-powered agent responses.
+**Note**: Without a valid API key, the app runs in DEMO mode with offline mock responses. Set `GEMINI_API_KEY` in `.env` for full AI-powered agent responses. The web search MCP server requires Playwright browsers; without it, the `web_search` tool gracefully degrades.
 
 ---
 
@@ -169,6 +178,7 @@ Push to `main` triggers GitHub Actions: lint → test → build → eval-gate ve
 │   ├── App.tsx              # React UI
 │   ├── types.ts             # Shared types
 │   └── __tests__/           # Test suites
+├── mcp-client.ts            # MCP client wrapper (spawns web-search-mcp)
 ├── server.ts                # Express server (all API routes)
 ├── Dockerfile
 └── package.json

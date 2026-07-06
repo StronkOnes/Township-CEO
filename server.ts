@@ -4,6 +4,7 @@ import fs from "fs";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { webSearchClient } from "./mcp-client.js";
 
 dotenv.config();
 
@@ -225,6 +226,29 @@ registerTool({
         ]
       }
     };
+  }
+});
+
+registerTool({
+  name: "web_search",
+  description: "Search the web for real-time information on business concepts, regulations, pricing trends, and market data. Use this tool when you need up-to-date context on topics outside the model's training data.",
+  parameters: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "The search query — use specific, targeted keywords for township business context" },
+      limit: { type: "number", description: "Number of results to return (1-10, default 5)" }
+    },
+    required: ["query"]
+  },
+  handler: async (args) => {
+    const { query, limit = 5 } = args;
+    try {
+      const result = await webSearchClient.searchWeb(query, Math.min(limit, 10));
+      return { success: true, toolName: "web_search", data: { results: result, query } };
+    } catch (err: any) {
+      console.warn("[web_search] Search failed:", err.message);
+      return { success: false, toolName: "web_search", data: null, error: err.message };
+    }
   }
 });
 
@@ -704,10 +728,23 @@ app.post("/api/agents/solve", async (req, res) => {
     // Research Agent
     const researchSpan = startSpan(session, 'think', 'Research Agent', sessionSpan.id);
     const researchInstruction = "You are the specialist Research Agent for township businesses. Gather competitive price benchmarks, local supply logistics, and regional supplier info.";
-    const researchPrompt = `${profileBlock}\n\n---QUESTION---\n${request}\n\n---TASK---\nAnalyze competitor trends for a ${profile.type} at ${profile.location}. Challenges: "${profile.challenges}". Give specific recommendations.`;
+    let researchWebContext = "";
+    const webSearchPatterns = /regulation|policy|law|act|new\s+rules|latest|trend|price\s+of|cost\s+of|supplier|wholesale|market\s+rate|inflation|interest\s+rate|grant|funding|loan|digital|app|software|tool|technology|platform|license|permit|compliance|tax|VAT|SARS|municipal|by.law|load.shedding|stage\s+\d|fuel\s+price|transport\s+cost|exchange\s+rate|border|import|export/i;
+    if (webSearchPatterns.test(request) || webSearchPatterns.test(profile.challenges || "")) {
+      const webSearchSpan = startSpan(session, 'tool', 'Research Agent', researchSpan.id);
+      const webResult = await executeTool("web_search", {
+        query: `${request} ${profile.type} ${profile.location} South Africa 2026`,
+        limit: 3
+      });
+      endSpan(session, webSearchSpan.id, webResult.success ? 'completed' : 'failed', { query: request });
+      if (webResult.success && webResult.data?.results) {
+        researchWebContext = `\n\n---WEB RESEARCH---\nRecent web context for this query:\n${webResult.data.results}`;
+      }
+    }
+    const researchPrompt = `${profileBlock}\n\n---QUESTION---\n${request}${researchWebContext}\n\n---TASK---\nAnalyze competitor trends for a ${profile.type} at ${profile.location}. Challenges: "${profile.challenges}". Give specific recommendations. Use the web research context if provided, but clearly note what's from web search vs. your own knowledge.`;
     const researchAnalysis = await provider.generateText(researchPrompt, { systemInstruction: researchInstruction });
     trackTokens(session, researchPrompt, researchAnalysis);
-    endSpan(session, researchSpan.id, 'completed', { tokenEstimate: estimateTokens(researchAnalysis) });
+    endSpan(session, researchSpan.id, 'completed', { tokenEstimate: estimateTokens(researchAnalysis), hadWebContext: !!researchWebContext });
 
     messages.push({
       id: "msg_2", sender: "Research Agent", receiver: "CEO Agent",
@@ -861,3 +898,14 @@ async function startServer() {
 }
 
 startServer();
+
+process.on("SIGINT", async () => {
+  console.log("\nShutting down MCP client...");
+  await webSearchClient.close();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  await webSearchClient.close();
+  process.exit(0);
+});

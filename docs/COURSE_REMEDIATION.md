@@ -17,10 +17,10 @@ This document tracks all changes required for Township CEO to fully comply with 
 | # | Task | File(s) | Status |
 |---|------|---------|--------|
 | 1.1 | Add iterative agent loop: perceive → plan → act → observe → iterate | `server.ts` | PENDING |
-| 1.2 | Implement static context (system instructions, GEMINI.md, AGENTS.md) | `server.ts`, new files | PENDING |
-| 1.3 | Implement dynamic context (on-demand skill loading, tool results, session history) | `server.ts` | PENDING |
-| 1.4 | Add user correction feedback mechanism after agent output | `App.tsx`, `server.ts` | PENDING |
-| 1.5 | Create GEMINI.md and AGENTS.md config files | root directory | PENDING |
+| 1.2 | Implement static context (system instructions, GEMINI.md, AGENTS.md) | `server.ts`, `.gemini/GEMINI.md`, `AGENTS.md` | COMPLETED |
+| 1.3 | Implement dynamic context (on-demand skill loading, tool results, session history) | `server.ts` | COMPLETED |
+| 1.4 | Add user correction feedback mechanism after agent output | `App.tsx`, `server.ts` | COMPLETED |
+| 1.5 | Create GEMINI.md and AGENTS.md config files | root directory | COMPLETED |
 
 ---
 
@@ -35,11 +35,13 @@ This document tracks all changes required for Township CEO to fully comply with 
 
 | # | Task | File(s) | Status |
 |---|------|---------|--------|
-| 2.1 | Implement ToolDefinition with JSON schemas as callable functions | `server.ts` | PENDING |
-| 2.2 | Wire cash_calculator, campaign_builder, inventory_optimizer as real tools | `server.ts` | PENDING |
-| 2.3 | Add tool execution engine that validates params and returns structured results | `server.ts` | PENDING |
-| 2.4 | Feed tool results back into agent context for next iteration | `server.ts` | PENDING |
-| 2.5 | Add MCP-style server endpoint for external tool discovery | `server.ts` | PENDING |
+| 2.1 | Implement ToolDefinition with JSON schemas as callable functions | `server.ts` | COMPLETED |
+| 2.2 | Wire cash_calculator, campaign_builder, inventory_optimizer as real tools | `server.ts` | COMPLETED |
+| 2.3 | Add tool execution engine that validates params and returns structured results | `server.ts` | COMPLETED |
+| 2.4 | Feed tool results back into agent context for next iteration | `server.ts` | COMPLETED |
+| 2.5 | Add MCP-style server endpoint for external tool discovery | `server.ts` | COMPLETED |
+| 2.6 | Integrate web-search-mcp external MCP server for real-time web research | `mcp-client.ts`, `server.ts` | COMPLETED |
+| 2.7 | Auto-trigger web search in Research Agent for regulation/pricing/trend queries | `server.ts`, `.agent/skills/research_agent/SKILL.md` | COMPLETED |
 
 ---
 
@@ -55,11 +57,11 @@ This document tracks all changes required for Township CEO to fully comply with 
 
 | # | Task | File(s) | Status |
 |---|------|---------|--------|
-| 3.1 | Restructure skills/ into proper SKILL.md format with folders | `skills/*` | PENDING |
-| 3.2 | Add scripts/, references/, assets/ subdirectories per skill | `skills/*/` | PENDING |
-| 3.3 | Define trigger conditions for each skill | `skills/*/SKILL.md` | PENDING |
-| 3.4 | Implement progressive disclosure engine (load skill on trigger match) | `server.ts` | PENDING |
-| 3.5 | Add token budget tracking per skill invocation | `server.ts` | PENDING |
+| 3.1 | Restructure skills/ into proper SKILL.md format with folders | `.agent/skills/*` | COMPLETED |
+| 3.2 | Add scripts/, references/, assets/ subdirectories per skill | `.agent/skills/*/` | COMPLETED |
+| 3.3 | Define trigger conditions for each skill | `.agent/skills/*/SKILL.md` | COMPLETED |
+| 3.4 | Implement progressive disclosure engine (load skill on trigger match) | `server.ts` | COMPLETED |
+| 3.5 | Add token budget tracking per skill invocation | `server.ts` | COMPLETED |
 | 3.6 | Implement skill evaluation gates | `server.ts` | PENDING |
 
 ---
@@ -80,13 +82,13 @@ This document tracks all changes required for Township CEO to fully comply with 
 
 | # | Task | File(s) | Status |
 |---|------|---------|--------|
-| 4.1 | Implement 7-dimension evaluation scoring (intent, correctness, cost, quality, trajectory, self-repair, safety) | `server.ts` | PENDING |
-| 4.2 | Add LLM-as-judge evaluator using Gemini to score agent outputs | `server.ts` | PENDING |
-| 4.3 | Add OpenTelemetry tracing (agent.session, agent.think, agent.tool spans) | `server.ts` | PENDING |
-| 4.4 | Implement token usage and cost tracking per session | `server.ts` | PENDING |
-| 4.5 | Add circuit breaker (Agent Trust Score, version checkpoints, rollback) | `server.ts` | PENDING |
+| 4.1 | Implement 7-dimension evaluation scoring (intent, correctness, cost, quality, trajectory, self-repair, safety) | `server.ts` | COMPLETED |
+| 4.2 | Add LLM-as-judge evaluator using Gemini to score agent outputs | `server.ts` | COMPLETED |
+| 4.3 | Add telemetry tracing (agent.session, agent.think, agent.tool spans) | `server.ts` | COMPLETED |
+| 4.4 | Implement token usage and cost tracking per session | `server.ts` | COMPLETED |
+| 4.5 | Add circuit breaker (Agent Trust Score, version checkpoints, rollback) | `server.ts` | COMPLETED |
 | 4.6 | Add Agent Behavioural Analytics (AgBOM tracking) | `server.ts` | PENDING |
-| 4.7 | Add intent satisfaction check using session prefix as rubric | `server.ts` | PENDING |
+| 4.7 | Add intent satisfaction check using session prefix as rubric | `server.ts` | COMPLETED |
 
 ---
 
@@ -104,25 +106,25 @@ This document tracks all changes required for Township CEO to fully comply with 
 
 | # | Task | File(s) | Status |
 |---|------|---------|--------|
-| 5.1 | Create specs/ folder with BDD .feature files for key use cases | `specs/*.feature` | PENDING |
-| 5.2 | Add Gherkin scenario definitions (Given/When/Then) | `specs/` | PENDING |
-| 5.3 | Implement 5 test cases (tool use, safe refusals, escalation) | `src/__tests__/` | PENDING |
-| 5.4 | Add GitHub Actions CI/CD workflow | `.github/workflows/` | PENDING |
-| 5.5 | Create Dockerfile for containerized deployment | root | PENDING |
-| 5.6 | Add layered prompt files (GEMINI.md, AGENTS.md) | root, `.gemini/` | PENDING |
-| 5.7 | Add evaluation-gated CI/CD checks | `.github/workflows/` | PENDING |
+| 5.1 | Create specs/ folder with BDD .feature files for key use cases | `specs/*.feature` | COMPLETED |
+| 5.2 | Add Gherkin scenario definitions (Given/When/Then) | `specs/` | COMPLETED |
+| 5.3 | Implement test cases (tool use, safe refusals, escalation) | `src/__tests__/` | COMPLETED |
+| 5.4 | Add GitHub Actions CI/CD workflow | `.github/workflows/` | COMPLETED |
+| 5.5 | Create Dockerfile for containerized deployment | root | COMPLETED |
+| 5.6 | Add layered prompt files (GEMINI.md, AGENTS.md) | root, `.gemini/` | COMPLETED |
+| 5.7 | Add evaluation-gated CI/CD checks | `.github/workflows/` | COMPLETED |
 
 ---
 
 ## Summary
 
-| Day | Tasks | Priority |
-|-----|-------|----------|
-| Day 1 | 5 tasks | HIGH |
-| Day 2 | 5 tasks | HIGH |
-| Day 3 | 6 tasks | HIGH |
-| Day 4 | 7 tasks | CRITICAL |
-| Day 5 | 7 tasks | HIGH |
-| **Total** | **30 tasks** | |
+| Day | Total | Completed | Pending | Priority |
+|-----|-------|-----------|---------|----------|
+| Day 1 | 5 | 4 | 1 (iterative loop) | HIGH |
+| Day 2 | 7 | 7 | 0 | HIGH |
+| Day 3 | 6 | 5 | 1 (eval gates) | HIGH |
+| Day 4 | 7 | 6 | 1 (AgBOM) | CRITICAL |
+| Day 5 | 7 | 7 | 0 | HIGH |
+| **Total** | **32** | **29** | **3** | |
 
 Last updated: 2026-07-06

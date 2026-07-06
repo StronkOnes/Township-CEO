@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+mcp-servers/
 coverage/
 .DS_Store
 *.log
